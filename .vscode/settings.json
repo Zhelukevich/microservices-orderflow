@@ -4,6 +4,14 @@
       "path": "catalog-service",
       "envManager": "ms-python.python:venv",
       "packageManager": "ms-python.python:pip"
+    },
+    {
+      "path": "order-service",
+      "envManager": "ms-python.python:venv",
+      "packageManager": "ms-python.python:pip"
     }
+  ],
+  "cSpell.words": [
+    "Foreing"
   ]
 }

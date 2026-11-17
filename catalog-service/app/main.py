@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from app.config import get_settings
+# from app.config import settings
 from app.database import engine, get_db
 from app.models import Base, Product
 from app.schemas import ProductCreate, ProductRead
@@ -12,22 +12,22 @@ from sqlalchemy.orm import Session
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    from app.models import Product
 
     Base.metadata.create_all(bind=engine)
     yield
 
 
-settings = get_settings()
 app = FastAPI(lifespan=lifespan)
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=setattr.cors_origins,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    allow_credentials=True,
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=settings,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+#     allow_credentials=True,
+# )
 
 
 @app.get("products", response_model=list[ProductRead])
