@@ -2,8 +2,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class OrderItemCreateSchema(BaseModel):
+    product_id: str
     quantity: int = Field(gt=0)
-    unit_price: int = Field(ge=0)
 
 
 class OrderItemReadSchema(BaseModel):
