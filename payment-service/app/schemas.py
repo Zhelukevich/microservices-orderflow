@@ -1,0 +1,16 @@
+from pydantic import BaseModel, ConfigDict
+
+
+class PaymentCreateSchema(BaseModel):
+    order_id: str
+    user_id: int
+    amount: int
+
+
+class PaymentReadSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    order_id: str
+    user_id: int
+    amount: int
