@@ -17,6 +17,6 @@ def get_catalog_client() -> CatalogClient:
 
 def get_order_service(
     db: Annotated[Session, Depends(get_db)],
-    catalog_client: Annotated[CatalogClient, Depends[get_catalog_client]],
+    catalog_client: Annotated[CatalogClient, Depends(get_catalog_client)],
 ) -> OrderService:
     return OrderService(db, catalog_client=catalog_client)
