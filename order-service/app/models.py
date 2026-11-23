@@ -20,7 +20,7 @@ class Base(DeclarativeBase):
 class Order(Base):
     __tablename__ = "orders"
 
-    user_id: Mapped[int]
+    user_id: Mapped[str]
     status: Mapped[str] = mapped_column(default="created")
     total_amount: Mapped[int]
     created_at: Mapped[datetime] = mapped_column(

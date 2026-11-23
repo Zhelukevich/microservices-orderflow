@@ -1,14 +1,21 @@
+from app.api_clients.catalog_client import CatalogClient
+from app.api_clients.payment_client import PaymentClient
 from app.config import NotFoundError
-from catalog_client import CatalogClient
 from models import Order, OrderItem
 from schemas import OrderCreateSchema, OrderReadSchema
 from sqlalchemy.orm import Session
 
 
 class OrderService:
-    def __init__(self, session: Session, catalog_client: CatalogClient) -> None:
+    def __init__(
+        self,
+        session: Session,
+        catalog_client: CatalogClient,
+        payment_client: PaymentClient,
+    ) -> None:
         self.session = session
         self.catalog_client = catalog_client
+        self.payment_client = payment_client
 
     def create(self, order_data: OrderCreateSchema) -> OrderReadSchema:
         products = []
@@ -22,10 +29,11 @@ class OrderService:
                     "unit_price": product["price"],
                 }
             )
-        total_amount = [product["unit_price"] for product in products]
+        total_amount = sum(p["unit_price"] * p["quantity"] for p in products)
+
         order = Order(
             user_id=order_data.user_id,
-            status="create",
+            status="created",
             total_amount=total_amount,
         )
         self.session.add(order)
@@ -33,6 +41,12 @@ class OrderService:
 
         order.items = [OrderItem(order_id=order.id, **product) for product in products]
         self.session.commit()
+
+        self.payment_client.create_payment(
+            order_id=order.id,
+            user_id=order.user_id,
+            amount=total_amount,
+        )
 
         return OrderReadSchema.model_validate(Order)
 
