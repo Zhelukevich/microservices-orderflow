@@ -2,6 +2,7 @@ from app.api_clients import CatalogClient, PaymentClient
 from app.config import NotFoundError
 from models import Order, OrderItem
 from schemas import OrderCreateSchema, OrderReadSchema
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 
@@ -54,3 +55,7 @@ class OrderService:
         if order is None:
             raise NotFoundError()
         return order
+
+    def get_all(self) -> list[Order]:
+        stmt = select(Order)
+        return list(self.session.scalars(stmt).all())
