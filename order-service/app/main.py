@@ -5,6 +5,7 @@ from app.config import NotFoundError
 from app.database import engine
 from app.dependencies import get_order_service
 from app.models import Base
+from app.rebbitmq import connect_rabbitmq, start_payment_consumer
 from app.schemas import OrderCreateSchema, OrderReadSchema
 from app.service import OrderService
 from fastapi import Depends, FastAPI, Request, status
@@ -14,7 +15,14 @@ from fastapi.responses import JSONResponse
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     Base.metadata.create_all(bind=engine)
-    yield
+
+    connection = await connect_rabbitmq()
+    await start_payment_consumer(connection)
+
+    try:
+        yield
+    finally:
+        await connection.close()
 
 
 app = FastAPI(lifespan=lifespan)

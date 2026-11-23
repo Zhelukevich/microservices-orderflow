@@ -1,5 +1,4 @@
-from app.api_clients.catalog_client import CatalogClient
-from app.api_clients.payment_client import PaymentClient
+from app.api_clients import CatalogClient, PaymentClient
 from app.config import NotFoundError
 from models import Order, OrderItem
 from schemas import OrderCreateSchema, OrderReadSchema
