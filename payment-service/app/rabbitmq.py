@@ -23,7 +23,7 @@ async def declare_payment_exchange(
     )
 
 
-async def publish_json(
+async def event_publish_json(
     exchange: AbstractExchange, routing_key: str, data: dict
 ) -> None:
     message = aio_pika.Message(

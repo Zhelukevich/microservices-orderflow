@@ -1,21 +1,32 @@
-import time
 from contextlib import asynccontextmanager
 from typing import Annotated
 
-from app.config import NotFoundError
+from app.config import NotFoundError, settings
 from app.database import engine
 from app.dependencies import get_payment_service
 from app.models import Base
-from app.schemas import PaymentCreateSchema
+from app.rabbitmq import connect_rabbitmq, declare_payment_exchange
+from app.schemas import PaymentCreateSchema, PaymentReadSchema
 from app.service import PaymentService
 from fastapi import Depends, FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
-    Base.metadata.create_all(bind=engine)
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    connection = await connect_rabbitmq(url=settings.rabbitmq_url)
+    channel = await connection.channel()
+    app.state.payment_exchange = await declare_payment_exchange(
+        channel=channel,
+        exchange_name=settings.payment_exchange_name,
+    )
+
     yield
+
+    await connection.close()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -32,8 +43,8 @@ def not_found_exception_handler(request: Request, exc: NotFoundError):
 
 
 @app.get(
-    "/payments/{payments_id}",
-    response_model=PaymentCreateSchema,
+    "/payments/{payment_id}",
+    response_model=PaymentReadSchema,
 )
 async def get_payment(
     payment_id: str,
@@ -44,14 +55,22 @@ async def get_payment(
 
 @app.post(
     "/payments/",
-    response_model=PaymentCreateSchema,
+    response_model=PaymentReadSchema,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_payment(
     payload: PaymentCreateSchema,
+    request: Request,
     payment_service: PaymentServiceDep,
 ):
     payment = await payment_service.create(payload)
-    time.sleep(3)
 
-    await payment_service.complete_payment(payment)
+    await payment_service.complete_payment(
+        payment,
+        order_id=payload.order_id,
+        user_id=payload.user_id,
+        amount=payload.amount,
+        exchange=request.app.state.payment_exchange,
+    )
+
+    return payment

@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import DateTime, String, func
+from sqlalchemy import DateTime, Integer, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -21,6 +21,7 @@ class PaymentORM(Base):
     __tablename__ = "payments"
 
     order_id: Mapped[str]
+    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(default="created")
     amount: Mapped[int]
     created_at: Mapped[datetime] = mapped_column(

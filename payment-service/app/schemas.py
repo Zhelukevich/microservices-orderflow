@@ -14,3 +14,4 @@ class PaymentReadSchema(BaseModel):
     order_id: str
     user_id: int
     amount: int
+    status: str
