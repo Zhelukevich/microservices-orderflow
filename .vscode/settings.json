@@ -16,7 +16,7 @@
       "packageManager": "ms-python.python:pip"
     },
     {
-      "path": ".vscode/auth_service",
+      "path": "auth_service",
       "envManager": "ms-python.python:venv",
       "packageManager": "ms-python.python:pip"
     }
