@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from app.api_client import request_service
 from app.auth import CurrentUser, get_current_user
 from app.config import settings
@@ -32,5 +34,5 @@ async def login(payload: UserLogin) -> TokenResponse:
 
 
 @router.get("/me", response_model=CurrentUser)
-async def get_me(current_user: CurrentUser = Depends(get_current_user)):
+async def get_me(current_user: Annotated[CurrentUser, Depends(get_current_user)]):
     return current_user

@@ -24,3 +24,15 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserRead
+
+
+class OrderItemCreate(BaseModel):
+    product_id: str
+    quantity: int = Field(gt=0)
+
+
+class OrderCreate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    user_id: int
+    items: list[OrderItemCreate] = Field(min_length=1)
